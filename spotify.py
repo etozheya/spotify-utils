@@ -18,8 +18,22 @@ def list_playlists(jwt, user_id=None):
 
 def list_tracks(jwt, playlist_id):
     url = SPOTIFY_URL + f'playlists/{playlist_id}/tracks'
-    resp = requests.get(url, headers=get_headers(jwt))
-    return resp.json()
+    headers = get_headers(jwt)
+    all_tracks = []
+    limit = 50
+    offset = 0
+
+    while True:
+        params = {'limit': limit, 'offset': offset}
+        response = requests.get(url, headers=headers, params=params)
+        data = response.json()
+        tracks = data.get("items", [])
+        all_tracks.extend(tracks)
+        if len(tracks) < limit:
+            break
+        offset += limit
+
+    return all_tracks
 
 
 def create_playlist(jwt, user_id, name, public=False):
@@ -41,7 +55,6 @@ def add_tracks_to_playlist(jwt, playlist_id, track_ids):
 def get_playlist_name(jwt, playlist_id):
     url = SPOTIFY_URL + f'playlists/{playlist_id}'
     resp = requests.get(url, headers=get_headers(jwt))
-    print(f'get_playlist_name {resp.status_code}')
     if resp.status_code == 200:
         return resp.json()['name']
     return ''

@@ -1,4 +1,5 @@
 import json
+import random
 
 import auth
 import spotify
@@ -57,7 +58,8 @@ def main():
         print('1. Change user')
         print('2. List your playlists')
         print('3. Reverse a playlist')
-        print('4. Exit')
+        print('4. Randomise order of tracks in a playlist')
+        print('5. Exit')
         choice = input('Enter your choice: ')
         if choice == '1':
             authenticate()
@@ -78,16 +80,29 @@ def main():
             playlist_name_to_reverse = 'reversed ' + spotify.get_playlist_name(
                 jwt, playlist_id_to_reverse)
             tracks = spotify.list_tracks(jwt, playlist_id_to_reverse)
-            print(f'Retrieved {len(tracks["items"])} tracks')
+            print(f'Retrieved {len(tracks)} tracks')
             reversed_playlist_id = spotify.create_playlist(
                 jwt, username, playlist_name_to_reverse)['id']
             print(f'New playlist id: {reversed_playlist_id}')
             reversed_ids = []
-            for t in tracks['items']:
+            for t in tracks:
                 reversed_ids.insert(0, t['track']['id'])
             spotify.add_tracks_to_playlist(
                 jwt, reversed_playlist_id, reversed_ids)
         elif choice == '4':
+            playlist_id_to_randomise = input('Enter playlist id to randomise: ')
+            playlist_name_to_randomise = 'randomised ' + spotify.get_playlist_name(
+                jwt, playlist_id_to_randomise)
+            tracks = spotify.list_tracks(jwt, playlist_id_to_randomise)
+            print(f'Retrieved {len(tracks)} tracks')
+            randomised_playlist_id = spotify.create_playlist(
+                jwt, username, playlist_name_to_randomise)['id']
+            print(f'New playlist id: {playlist_id_to_randomise}')
+            randomised_ids = [t['track']['id'] for t in tracks]
+            random.shuffle(randomised_ids)
+            spotify.add_tracks_to_playlist(
+                jwt, randomised_playlist_id, randomised_ids)
+        elif choice == '5':
             print('Exiting...')
             break
         else:
