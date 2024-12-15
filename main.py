@@ -1,8 +1,16 @@
 import json
 import random
+from collections import Counter, defaultdict
+from pathlib import Path
 
 import auth
 import spotify
+
+
+MS_TO_COUNT_WRAPPED = 60000
+TOP_TRACKS_NUMBER_WRAPPED = 100
+TOP_ARTISTS_NUMBER_WRAPPED = 50
+YEAR_WRAPPED = '2024'
 
 
 def get_credentials():
@@ -59,7 +67,8 @@ def main():
         print('2. List your playlists')
         print('3. Reverse a playlist')
         print('4. Randomise order of tracks in a playlist')
-        print('5. Exit')
+        print('5. Get your Wrapped')
+        print('6. Exit')
         choice = input('Enter your choice: ')
         if choice == '1':
             authenticate()
@@ -103,6 +112,42 @@ def main():
             spotify.add_tracks_to_playlist(
                 jwt, randomised_playlist_id, randomised_ids)
         elif choice == '5':
+            tracks = []
+            for file in Path('wrapped').glob('*.json'):
+                with file.open('r', encoding='utf-8') as json_file:
+                    data = json.load(json_file)
+                    for audio in data:
+                        if not audio['ts'].startswith(YEAR_WRAPPED):
+                            continue
+                        if audio['ms_played'] < MS_TO_COUNT_WRAPPED:
+                            continue
+                        if not audio['master_metadata_track_name'] or \
+                                not audio['master_metadata_album_artist_name']:
+                            continue
+                        tracks.append({
+                            'name': audio['master_metadata_track_name'],
+                            'artist': audio['master_metadata_album_artist_name']
+                        })
+            track_tuples = [(t['name'], t['artist']) for t in tracks]
+            track_counter = Counter(track_tuples)
+            top_tracks = track_counter.most_common(TOP_TRACKS_NUMBER_WRAPPED)
+            print(f"Top {TOP_TRACKS_NUMBER_WRAPPED} Tracks:")
+            for (name, artist), count in top_tracks:
+                print(f"Track: {name}, Artist: {artist}, Plays: {count}")
+            artists = defaultdict(int)
+            for track in tracks:
+                artists[track['artist']] += 1
+            for track in tracks:
+                track_name = track['name']
+                for artist in artists.keys():
+                    if artist in track_name:
+                        artists[artist] += 1
+            sorted_artists = sorted(
+                artists.items(), key=lambda x: x[1], reverse=True)
+            print(f"Top {TOP_ARTISTS_NUMBER_WRAPPED} Artists:")
+            for artist, count in sorted_artists[:TOP_ARTISTS_NUMBER_WRAPPED]:
+                print(f"Artist: {artist}, Listenings: {count}")
+        elif choice == '6':
             print('Exiting...')
             break
         else:

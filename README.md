@@ -18,6 +18,8 @@ reversed from an existing playlist.
 
 ## Usage
 
+### Setup
+
 * [Create Spotify app](https://developer.spotify.com/documentation/web-api)
   * [Log into the dashboard](https://developer.spotify.com/dashboard)
   * Create a `Web API` app
@@ -38,6 +40,11 @@ python main.py
 * **Important:** every time you run the script or relogin you will be redirected 
 to a browser, copy the code from the url after the `code=`. It is required for authentication.
 
+### Wrapped
+
+1. Request your data [here](https://www.spotify.com/uk/account/privacy/)
+2. Save the json files into the `wrapped` folder
+3. Adjust configuration variables at the top of the `main.py` file
 
 ## Contributing
 
