@@ -8,6 +8,10 @@ Currently, it includes functionality to create a reversed playlist on Spotify.
 
 * Reverse Playlist Creation: Create a new playlist on Spotify with the tracks
 reversed from an existing playlist.
+* Randomise Playlist: Create a new playlist on Spotify with the tracks 
+from an existing playlist in a random order.
+* Wrapped: Get a list of most listened tracks configurable 
+by time you listened to a song
 
 
 ## Requirements
